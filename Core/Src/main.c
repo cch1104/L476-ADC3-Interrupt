@@ -21,7 +21,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "lcd.h"
+#include "stdio.h"
+volatile uint8_t convend=0;
+uint32_t adcResult;
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +59,10 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    convend = 1;
+}
 /* USER CODE END 0 */
 
 /**
@@ -95,8 +101,24 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  	lcd_Init();
+  	lcd_Clear();
+  	lcd_Puts("Voltmeter");
+	char buff[16];
+	float mv;
+	HAL_ADC_Start_IT(&hadc1);
   while (1)
   {
+	  if(convend ==1){
+		  convend=0;
+		  adcResult = HAL_ADC_GetValue(&hadc1);
+		  HAL_ADC_Start_IT(&hadc1);
+		  mv=((float)adcResult)*3300.0/4095.0;
+		  lcd_Goto(0,1);
+		  sprintf(buff, "%7.2f mV", mv);
+		  lcd_Puts(buff);
+		  HAL_Delay(1000);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -206,7 +228,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_12CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
