@@ -112,12 +112,12 @@ int main(void)
 	  if(convend ==1){
 		  convend=0;
 		  adcResult = HAL_ADC_GetValue(&hadc1);
-		  HAL_ADC_Start_IT(&hadc1);
 		  mv=((float)adcResult)*3300.0/4095.0;
 		  lcd_Goto(0,1);
 		  sprintf(buff, "%7.2f mV", mv);
 		  lcd_Puts(buff);
 		  HAL_Delay(1000);
+		  HAL_ADC_Start_IT(&hadc1);
 	  }
     /* USER CODE END WHILE */
 
